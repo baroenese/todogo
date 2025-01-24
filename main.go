@@ -24,8 +24,7 @@ func main() {
 	cfg := defaultConfig()
 	cfg.loadFromEnv()
 	if len(configFileName) > 0 {
-		err := loadConfigFromFile(configFileName, &cfg)
-		if err != nil {
+		if err := loadConfigFromFile(configFileName, &cfg); err != nil {
 			log.Warn().Str("file", configFileName).Err(err).Msg("canot load config file, use defaults")
 		}
 	}
@@ -36,8 +35,15 @@ func main() {
 	if pgErr != nil {
 		log.Error().Err(pgErr).Msg("unable to connect to database")
 	}
+	defer pool.Close()
 	serviceHandler := service(pool)
 	server := &http.Server{Addr: cfg.Listen.Addr(), Handler: serviceHandler}
+	go func() {
+		log.Info().Str("addr", cfg.Listen.Addr()).Msg("starting server")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal().Err(err).Msg("failed to start the server")
+		}
+	}()
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	sig := <-signalChan
@@ -53,13 +59,9 @@ func main() {
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Fatal().Err(err).Msg("shutdown error")
 	}
-	log.Info().Msg("Starting up server...")
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal().Err(err).Msg("failed to start the server")
-	}
 	log.Info().Msg("closing database connection pool")
 	pool.Close()
-	log.Info().Msg("server stopped")
+	log.Info().Msg("server gracefully stopped")
 }
 
 func service(newPool *pgxpool.Pool) http.Handler {
@@ -69,7 +71,7 @@ func service(newPool *pgxpool.Pool) http.Handler {
 	app.Use(middleware.Logger)
 	app.Use(middleware.Recoverer)
 	app.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Hello world!"))
 	})
 	app.Get("/slow", func(w http.ResponseWriter, r *http.Request) {
