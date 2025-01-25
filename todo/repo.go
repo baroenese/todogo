@@ -25,7 +25,7 @@ func findItemById(ctx context.Context, tx pgx.Tx, id ulid.ULID) (TodoItem, error
 		return TodoItem{}, err
 	}
 	var item TodoItem
-	err = tx.QueryRow(ctx, sqlStr, args).Scan(&item.Id, &item.Title, &item.CreatedAt, &item.DoneAt)
+	err = tx.QueryRow(ctx, sqlStr, args...).Scan(&item.Id, &item.Title, &item.CreatedAt, &item.DoneAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			log.Fatal().Err(err).Msg("can't find any item")
