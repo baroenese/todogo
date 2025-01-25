@@ -7,8 +7,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/oklog/ulid/v2"
-
-	sq "github.com/Masterminds/squirrel"
 )
 
 var (
@@ -17,6 +15,12 @@ var (
 
 func Router() *chi.Mux {
 	app := chi.NewMux()
+	app.Use(func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			h.ServeHTTP(w, r)
+		})
+	})
 	app.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		resp, err := listItems(ctx)
@@ -24,7 +28,6 @@ func Router() *chi.Mux {
 			writeMessageError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(resp)
 	})
@@ -48,7 +51,6 @@ func Router() *chi.Mux {
 			return
 		}
 		resp = item
-		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(resp)
 	})
@@ -68,7 +70,6 @@ func Router() *chi.Mux {
 			Id string `json:"id"`
 		}
 		resp.Id = id.String()
-		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(resp)
 	})
@@ -94,25 +95,8 @@ func Router() *chi.Mux {
 		}
 
 		resp.Id = id.String()
-		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(resp)
-	})
-	app.Get("/test-query", func(w http.ResponseWriter, r *http.Request) {
-		var j struct {
-			Msg string `json:"message"`
-		}
-		sqlCreate := sq.Insert("todolist").
-			Columns("id", "title", "created_at", "done_at").
-			Values("item.Id", "item.Title", "item.CreatedAt", "item.DoneAt").
-			Suffix("ON CONFLICT(id) DO UPDATE SET title=$2, done_at=$4").
-			PlaceholderFormat(sq.Dollar)
-
-		sqlStrCreate, _, _ := sqlCreate.ToSql()
-		j.Msg = sqlStrCreate
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(j)
 	})
 	return app
 }
@@ -122,7 +106,6 @@ func writeMessageError(w http.ResponseWriter, status int, msg string) {
 		Msg string `json:"message"`
 	}
 	j.Msg = msg
-	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(j)
 }
