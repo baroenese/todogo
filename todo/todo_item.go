@@ -33,10 +33,9 @@ func NewTodoItem(title string) (TodoItem, error) {
 	if err := validateTitle(title); err != nil {
 		return TodoItem{}, err
 	}
-	item := TodoItem{
+	return TodoItem{
 		Id:        ulid.Make(),
 		Title:     title,
 		CreatedAt: time.Now(),
-	}
-	return item, nil
+	}, nil
 }

@@ -7,13 +7,13 @@ import (
 )
 
 var (
-	pool            *pgxpool.Pool
-	ErrTodoNotFound = errors.New("todo: not found")
+	pool       *pgxpool.Pool
+	ErrNilPool = errors.New("cannot assign nill pool")
 )
 
 func SetPool(newPool *pgxpool.Pool) error {
 	if newPool == nil {
-		return errors.New("cannot assign nill pool")
+		return ErrNilPool
 	}
 	pool = newPool
 	return nil

@@ -9,18 +9,19 @@ import (
 )
 
 func (item TodoItem) MarshalJSON() ([]byte, error) {
-	var j struct {
+	j := struct {
 		Id        ulid.ULID  `json:"id"`
 		Title     string     `json:"title"`
 		CreatedAt time.Time  `json:"created_at"`
 		DoneAt    *time.Time `json:"done_at,omitempty"`
 		IsDone    bool       `json:"is_done"`
+	}{
+		Id:        item.Id,
+		Title:     item.Title,
+		CreatedAt: item.CreatedAt,
+		DoneAt:    item.DoneAt.Ptr(),
+		IsDone:    item.IsDone(),
 	}
-	j.Id = item.Id
-	j.Title = item.Title
-	j.CreatedAt = item.CreatedAt
-	j.DoneAt = item.DoneAt.Ptr()
-	j.IsDone = item.IsDone()
 	return json.Marshal(j)
 }
 
@@ -38,13 +39,10 @@ func (item *TodoItem) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	doneAt := parseNullStringToNullTime(j.DoneAt)
-	item = &TodoItem{
-		Id:        j.Id,
-		Title:     j.Title,
-		CreatedAt: createdAt,
-		DoneAt:    doneAt,
-	}
+	item.Id = j.Id
+	item.Title = j.Title
+	item.CreatedAt = createdAt
+	item.DoneAt = parseNullStringToNullTime(j.DoneAt)
 	return nil
 }
 

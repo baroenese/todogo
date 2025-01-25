@@ -2,12 +2,17 @@ package todo
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/oklog/ulid/v2"
 
 	sq "github.com/Masterminds/squirrel"
+)
+
+var (
+	ErrTodoNotFound = errors.New("todo: not found")
 )
 
 func Router() *chi.Mux {
