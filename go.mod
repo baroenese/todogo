@@ -6,7 +6,9 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/go-chi/chi/v5 v5.2.0
 	github.com/jackc/pgx/v5 v5.7.2
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/rs/zerolog v1.33.0
+	gopkg.in/guregu/null.v4 v4.0.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

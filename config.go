@@ -45,20 +45,11 @@ func (p pgConfig) ConnStr() string {
 	return fmt.Sprintf("postgres://postgres:example@%s:%d/%s", p.Host, p.Port, p.DBName)
 }
 
-func (p pgConfig) loadFromEnv() {
+func (p pgConfig) LoadFromEnv() {
 	loadEnvStr("KAD_DB_HOST", &p.Host)
 	loadEnvUint("KAD_DB_PORT", &p.Port)
 	loadEnvStr("KAD_DB_NAME", &p.DBName)
 	loadEnvStr("KAD_DB_SSL", &p.SslMode)
-}
-
-func defaultPgConfig() pgConfig {
-	return pgConfig{
-		Host:    "localhost",
-		Port:    5432,
-		DBName:  "todo",
-		SslMode: "disable",
-	}
 }
 
 type listenConfig struct {
