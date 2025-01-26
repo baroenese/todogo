@@ -11,9 +11,9 @@ func listItems(ctx context.Context) (TodoList, error) {
 	if err != nil {
 		return TodoList{}, err
 	}
-	list, err1 := findAllItems(ctx, tx)
-	if err1 != nil {
-		return TodoList{}, err1
+	list, err := findAllItems(ctx, tx)
+	if err != nil {
+		return TodoList{}, err
 	}
 	tx.Commit(ctx)
 	return list, nil

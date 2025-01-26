@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"example.com/todo/todo"
+	"example.com/todogo/todo"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog/log"
