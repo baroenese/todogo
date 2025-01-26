@@ -1,4 +1,4 @@
-module example.com/todogo
+module github.com/baroenese/todogo
 
 go 1.23.5
 
