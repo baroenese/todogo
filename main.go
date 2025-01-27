@@ -30,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer globalDBPool.Close()
-	// Start koneksion todo
+	// Mulai global koneksi postgres database
 	if err := database.SetPool(globalDBPool); err != nil {
 		log.Error().Err(err).Msg("failed to set pool")
 		os.Exit(1)
@@ -139,7 +139,7 @@ func service() http.Handler {
 	app.Get("/slow", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		select {
-		case <-time.After(20 * time.Second):
+		case <-time.After(5 * time.Second):
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("completed work.\n"))
 		case <-ctx.Done():
