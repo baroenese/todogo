@@ -129,7 +129,7 @@ listen:
   port: 8080
 
 db:
-  db_name: todo
+  dbname: todo
   host: 127.0.0.1
   port: 5432 
   ssl_mode: disable
