@@ -102,7 +102,7 @@ go build -tags=fake
 
 ## Konfigurasi
 
-### Rasional
+### *Rationale*
 
 Versi awal program ini tidak memiliki file konfigurasi dan semua parameter di-hardcode. Pada awalnya saya pikir itu sudah cukup. Namun, saya pikir memberikan contoh tentang bagaimana mengimplementasikan server yang mematuhi aturan [12 Factor App](https://12factor.net/) adalah penting.
 
