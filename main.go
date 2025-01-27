@@ -100,6 +100,7 @@ func loadConfig() config {
 	var configFileName string
 	flag.StringVar(&configFileName, "c", "config.yml", "Config file name")
 	flag.Parse()
+	// Mulai config
 	cfg := defaultConfig()
 	cfg.loadFromEnv()
 	if configFileName != "" {
@@ -146,6 +147,7 @@ func service() http.Handler {
 			http.Error(w, "request cancelled", http.StatusRequestTimeout)
 		}
 	})
+	// Todo api route
 	app.Mount("/api/todo", todo.Router())
 	return app
 }

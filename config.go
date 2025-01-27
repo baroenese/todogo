@@ -34,20 +34,34 @@ func loadEnvUint(key string, result *uint) {
 /* Configuration */
 
 type pgConfig struct {
-	Host string `yaml:"host" json:"host"`
-	Port uint   `yaml:"port" json:"port"`
+	Host     string `yaml:"host" json:"host"`
+	Port     uint   `yaml:"port" json:"port"`
+	Username string `yaml:"username" json:"username"`
+	Password string `yaml:"password" json:"password"`
+	DBName   string `yaml:"db_name" json:"db_name"`
+	SslMode  string `yaml:"ssl_mode" json:"ssl_mode"`
+}
 
-	DBName  string `yaml:"db_name" json:"db_name"`
-	SslMode string `yaml:"ssl_mode" json:"ssl_mode"`
+func defaultPgConfig() pgConfig {
+	return pgConfig{
+		Host:     "localhost",
+		Port:     5432,
+		Username: "john",
+		Password: "example",
+		DBName:   "todo",
+		SslMode:  "disable",
+	}
 }
 
 func (p pgConfig) ConnStr() string {
-	return fmt.Sprintf("postgres://postgres:example@%s:%d/%s", p.Host, p.Port, p.DBName)
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", p.Username, p.Password, p.Host, p.Port, p.DBName)
 }
 
-func (p pgConfig) LoadFromEnv() {
+func (p pgConfig) loadFromEnv() {
 	loadEnvStr("KAD_DB_HOST", &p.Host)
 	loadEnvUint("KAD_DB_PORT", &p.Port)
+	loadEnvStr("KAD_DB_USERNAME", &p.Username)
+	loadEnvStr("KAD_DB_PASSWORD", &p.Password)
 	loadEnvStr("KAD_DB_NAME", &p.DBName)
 	loadEnvStr("KAD_DB_SSL", &p.SslMode)
 }
@@ -80,11 +94,13 @@ type config struct {
 
 func (c *config) loadFromEnv() {
 	c.Listen.loadFromEnv()
+	c.DBConfig.loadFromEnv()
 }
 
 func defaultConfig() config {
 	return config{
-		Listen: defaultListenConfig(),
+		Listen:   defaultListenConfig(),
+		DBConfig: defaultPgConfig(),
 	}
 }
 

@@ -32,13 +32,13 @@ func Router() *chi.Mux {
 		json.NewEncoder(w).Encode(resp)
 	})
 	app.Get("/{itemId}", func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
 		itemId := chi.URLParam(r, "itemId")
 		id, err := ulid.Parse(itemId)
 		if err != nil {
 			writeMessageError(w, http.StatusBadRequest, err.Error())
 			return
 		}
+		ctx := r.Context()
 		var resp TodoItem
 		item, err := findItem(ctx, id)
 		if err != nil {
@@ -59,8 +59,8 @@ func Router() *chi.Mux {
 			writeMessageError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		ctx := r.Context()
 		title := r.FormValue("title")
+		ctx := r.Context()
 		id, err := createItem(ctx, title)
 		if err != nil {
 			writeMessageError(w, http.StatusBadRequest, err.Error())
@@ -78,13 +78,13 @@ func Router() *chi.Mux {
 			writeMessageError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		ctx := r.Context()
 		idStr := r.FormValue("id")
 		id, err := ulid.Parse(idStr)
 		if err != nil {
 			writeMessageError(w, http.StatusBadRequest, err.Error())
 			return
 		}
+		ctx := r.Context()
 		err = makeItemDone(ctx, id)
 		if err != nil {
 			writeMessageError(w, http.StatusInternalServerError, err.Error())
