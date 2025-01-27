@@ -90,11 +90,12 @@ func Router() *chi.Mux {
 			writeMessageError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		var resp struct {
+		resp := struct {
 			Id string `json:"id"`
+		}{
+			Id: id.String(),
 		}
 
-		resp.Id = id.String()
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(resp)
 	})
@@ -102,10 +103,11 @@ func Router() *chi.Mux {
 }
 
 func writeMessageError(w http.ResponseWriter, status int, msg string) {
-	var j struct {
+	j := struct {
 		Msg string `json:"message"`
+	}{
+		Msg: msg,
 	}
-	j.Msg = msg
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(j)
 }
