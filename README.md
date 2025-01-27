@@ -1,6 +1,9 @@
 ## Cara build
 ```sh
-go build -ldflags '-w -s' -o myApp
+go build -ldflags "-s -w" -o myApp
+
+# atau pada windows
+GOOS=windows GOARCH=amd64 go build -o app.exe -ldflags="-s -w"
 ```
 
 ## LICENSE
