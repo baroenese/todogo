@@ -13,7 +13,8 @@ var (
 )
 
 var (
-	ErrNilPool = errors.New("cannot assign nill pool")
+	ErrNilPool            = errors.New("cannot assign nill pool")
+	ErrPoolNotInitialized = errors.New("database pool is not initialized")
 )
 
 func SetPool(newPool *pgxpool.Pool) error {
@@ -30,7 +31,7 @@ func GetPool() (*pgxpool.Pool, error) {
 	poolMu.RLock()
 	defer poolMu.RUnlock()
 	if dbPool == nil {
-		return nil, errors.New("database pool is not initialized")
+		return nil, ErrPoolNotInitialized
 	}
 	return dbPool, nil
 }
