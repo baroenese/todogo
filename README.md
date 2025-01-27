@@ -4,6 +4,8 @@ Proyek ini terinspirasi dari chanel youtube [Review Kodingan Go Yang Sangat Tida
 
 Ucapan terima kasih yang sebesar-besarnya kepada Mas Didit Koding aja dulu [KJM](https://www.youtube.com/@KodingAjaDulu) atas ilmu yang telah dibagikan🙏🏽
 
+Source asli dapat dilihat pada (Module Driven Go Todolist)[https://github.com/kadcom/mda]
+
 ## Database
 
 Konfigurasi database dapat dilihat pada repositori __todogo-migration__
