@@ -116,9 +116,9 @@ Lihat `config.go`. File ini berisi kode untuk mengurai file konfigurasi dari dua
 | `KAD_LISTEN_PORT`     | `listen.port` | 8080          | Port Server         |
 | `KAD_DB_HOST`         | `db.host`     | "127.0.0.1"   | Host Postgres       |
 | `KAD_DB_PORT`         | `db.port`     | 5432          | Port Postgres       |
-| `KAD_DB_NAME`         | `db.db_name`  | "todo"        | Nama Database       |
-| `KAD_DB_USER`         | `db.db_username`  | "John"        | Username Database       |
-| `KAD_DB_PASS`         | `db.db_pass`  | "example"        | Password Database       |
+| `KAD_DB_NAME`         | `db.dbname`  | "todo"        | Nama Database       |
+| `KAD_DB_USERNAME`         | `db.username`  | "John"        | Username Database       |
+| `KAD_DB_PASSWORD`         | `db.password`  | "example"        | Password Database       |
 | `KAD_DB_SSL`          | `db.ssl_mode` | "disable"     | Mode SSL            |
 
 Nilai default, jika kita mengungkapkannya dalam file konfigurasi adalah sebagai berikut.

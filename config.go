@@ -34,11 +34,11 @@ func loadEnvUint(key string, result *uint) {
 /* Configuration */
 
 type pgConfig struct {
-	Host     string `yaml:"db_host" json:"db_host"`
-	Port     uint   `yaml:"db_port" json:"db_port"`
-	Username string `yaml:"db_username" json:"db_username"`
-	Password string `yaml:"db_password" json:"db_password"`
-	DBName   string `yaml:"db_name" json:"db_name"`
+	Host     string `yaml:"host" json:"host"`
+	Port     uint   `yaml:"port" json:"port"`
+	Username string `yaml:"username" json:"username"`
+	Password string `yaml:"password" json:"password"`
+	DBName   string `yaml:"dbname" json:"dbname"`
 	SslMode  string `yaml:"ssl_mode" json:"ssl_mode"`
 }
 

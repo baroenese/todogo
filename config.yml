@@ -3,9 +3,9 @@ listen:
   port: 8080
 
 db:
-  db_name: todogo
   host: 127.0.0.1
   port: 5432 
-  ssl_mode: disable
   username: postgres
   password: example
+  dbname: todogo
+  ssl_mode: disable
