@@ -3,7 +3,9 @@ listen:
   port: 8080
 
 db:
-  db_name: todo
+  db_name: gotodo
   host: 127.0.0.1
   port: 5432 
   ssl_mode: disable
+  username: John
+  password: Example
