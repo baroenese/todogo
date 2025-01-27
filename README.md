@@ -1,4 +1,9 @@
+## Pencerahan
+
+database dapat dilihat pada repositori todogo-migration
+
 ## Cara build
+
 ```sh
 go build -ldflags "-s -w" -o myApp
 

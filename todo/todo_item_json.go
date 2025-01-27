@@ -10,11 +10,6 @@ import (
 )
 
 func (item TodoItem) MarshalJSON() ([]byte, error) {
-	id := item.GetID()
-	title := item.GetTitle()
-	createdAt := item.GetCreatedAt()
-	doneAt := item.GetDoneAt().Ptr()
-	isDone := item.IsDone()
 	j := struct {
 		Id        ulid.ULID  `json:"id"`
 		Title     string     `json:"title"`
@@ -22,11 +17,11 @@ func (item TodoItem) MarshalJSON() ([]byte, error) {
 		DoneAt    *time.Time `json:"done_at,omitempty"`
 		IsDone    bool       `json:"is_done"`
 	}{
-		Id:        id,
-		Title:     title,
-		CreatedAt: createdAt,
-		DoneAt:    doneAt,
-		IsDone:    isDone,
+		Id:        item.GetID(),
+		Title:     item.GetTitle(),
+		CreatedAt: item.GetCreatedAt(),
+		DoneAt:    item.GetDoneAt().Ptr(),
+		IsDone:    item.IsDone(),
 	}
 	return json.Marshal(j)
 }
