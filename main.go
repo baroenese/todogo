@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -18,26 +19,16 @@ import (
 )
 
 func main() {
-	var configFileName string
-	flag.StringVar(&configFileName, "c", "config.yml", "Config file name")
-	flag.Parse()
-	cfg := defaultConfig()
-	cfg.loadFromEnv()
-	if len(configFileName) > 0 {
-		if err := loadConfigFromFile(configFileName, &cfg); err != nil {
-			log.Warn().Str("file", configFileName).Err(err).Msg("canot load config file, use defaults")
-		}
-	}
+	cfg := loadConfig()
 	log.Debug().Any("config", cfg).Msg("config loaded")
-	dbCtx, dbCancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer dbCancel()
-	pool, pgErr := pgxpool.New(dbCtx, cfg.DBConfig.ConnStr())
-	if pgErr != nil {
-		log.Error().Err(pgErr).Msg("unable to connect to database")
+	pool, err := initDB(cfg.DBConfig.ConnStr())
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("unable to connect to database")
 	}
 	defer pool.Close()
-	serviceHandler := service(pool)
-	server := &http.Server{Addr: cfg.Listen.Addr(), Handler: serviceHandler}
+	server := &http.Server{Addr: cfg.Listen.Addr(), Handler: service(pool)}
 	go func() {
 		log.Info().Str("addr", cfg.Listen.Addr()).Msg("starting server")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -50,18 +41,52 @@ func main() {
 	log.Info().Str("signal", sig.String()).Msg("shutdown signal received")
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer shutdownCancel()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Error().Err(err).Msg("shutdown error")
+		}
+	}()
 	go func() {
 		<-shutdownCtx.Done()
 		if shutdownCtx.Err() == context.DeadlineExceeded {
-			log.Fatal().Msg("graceful shutdown timed out.. forcing exit.")
+			log.Error().Msg("graceful shutdown timed out.. forcing exit.")
 		}
 	}()
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Fatal().Err(err).Msg("shutdown error")
-	}
+	wg.Wait()
 	log.Info().Msg("closing database connection pool")
 	pool.Close()
 	log.Info().Msg("server gracefully stopped")
+}
+
+func initDB(connStr string) (*pgxpool.Pool, error) {
+	dbCtx, dbCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer dbCancel()
+	pool, err := pgxpool.New(dbCtx, connStr)
+	if err != nil {
+		log.Error().Err(err).Msg("unable to connect to database")
+		return nil, err
+	}
+	return pool, nil
+}
+
+func loadConfig() config {
+	var configFileName string
+	flag.StringVar(&configFileName, "c", "config.yml", "Config file name")
+	flag.Parse()
+	cfg := defaultConfig()
+	cfg.loadFromEnv()
+	if configFileName != "" {
+		if err := loadConfigFromFile(configFileName, &cfg); err != nil {
+			log.Error().
+				Str("file", configFileName).
+				Err(err).
+				Msg("canot load config file, use defaults")
+		}
+	}
+	return cfg
 }
 
 func service(newPool *pgxpool.Pool) http.Handler {
