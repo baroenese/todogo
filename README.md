@@ -10,7 +10,7 @@ Konfigurasi database dapat dilihat pada repositori __todogo-migration__
 
 # Modul-Driven Go
 
-Berbeda dengan yang disebut sebagai *'standard go structure'*, proyek ini bertujuan untuk menunjukkan bahwa untuk membuat perangkat lunak yang mengikuti arsitektur bawang (onion architecture) di Go, Anda tidak perlu membuat banyak objek dan struktur.
+Berbeda dengan yang disebut sebagai *'standard go structure'*, proyek ini bertujuan untuk menunjukkan bahwa untuk membuat perangkat lunak yang mengikuti arsitektur bawang *(onion architecture)* di Go, Anda tidak perlu membuat banyak objek dan struktur.
 
 ## Motivasi
 
