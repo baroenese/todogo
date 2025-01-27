@@ -110,7 +110,12 @@ func service(newPool *pgxpool.Pool) http.Handler {
 			http.Error(w, "request cancelled", http.StatusRequestTimeout)
 		}
 	})
-	todo.SetPool(newPool)
+	if err := todo.SetPool(newPool); err != nil {
+		log.Error().Err(err).Msg("failed to set pool")
+	}
+	if todo.IsPoolInitialized() {
+		log.Info().Msg("database pool is initialized!")
+	}
 	app.Mount("/api/todo", todo.Router())
 	return app
 }

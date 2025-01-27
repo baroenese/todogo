@@ -8,8 +8,10 @@ var (
 	ErrTitleEmpty    = errors.New("todo: title empty")
 )
 
-const minTitle = 5
-const maxTitle = 1000
+const (
+	minTitle = 5
+	maxTitle = 1000
+)
 
 func validateTitle(title string) error {
 	l := len(title)

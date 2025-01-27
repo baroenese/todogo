@@ -8,7 +8,11 @@ import (
 )
 
 func withTransaction(ctx context.Context, fn func(ctx context.Context, tx pgx.Tx) error) error {
-	tx, err := pool.Begin(ctx)
+	dbPool, err := GetPool()
+	if err != nil {
+		return err
+	}
+	tx, err := dbPool.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -41,20 +45,17 @@ func createItem(ctx context.Context, title string) (ulid.ULID, error) {
 	if err != nil {
 		return id, err
 	}
-	return todoItem.Id, nil
+	return todoItem.GetID(), nil
 }
 
-func findItem(ctx context.Context, id ulid.ULID) (item TodoItem, err error) {
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		return
-	}
-	item, err = findItemById(ctx, tx, id)
-	if err != nil {
-		return TodoItem{}, err
-	}
-	err = tx.Commit(ctx)
-	return
+func findItem(ctx context.Context, id ulid.ULID) (TodoItem, error) {
+	var item TodoItem
+	err := withTransaction(ctx, func(ctx context.Context, tx pgx.Tx) error {
+		var err error
+		item, err = findItemById(ctx, tx, id)
+		return err
+	})
+	return item, err
 }
 
 func makeItemDone(ctx context.Context, id ulid.ULID) error {
@@ -64,7 +65,6 @@ func makeItemDone(ctx context.Context, id ulid.ULID) error {
 			return err
 		}
 		if err = item.MakeDone(); err != nil {
-			tx.Rollback(ctx)
 			return err
 		}
 		return saveItem(ctx, tx, item)

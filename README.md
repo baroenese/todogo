@@ -1,3 +1,8 @@
+## Cara build
+```sh
+go build -ldflags '-w -s' -o myApp
+```
+
 ## LICENSE
 
 ```

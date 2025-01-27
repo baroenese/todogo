@@ -4,9 +4,12 @@ package todo
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
+	"gopkg.in/guregu/null.v4"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -16,13 +19,15 @@ type TodoList struct {
 	Count int        `json:"count"`
 }
 
-var emptyList = TodoList{}
+var (
+	emptyList = TodoList{}
+	psql2     = sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+)
 
 const limit = 100
 
 func findAllItems(ctx context.Context, tx pgx.Tx) (TodoList, error) {
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	sqlStr, args, err := psql.Select("COUNT(id) as cnt").
+	sqlStr, args, err := psql2.Select("COUNT(id) as cnt").
 		From("todolist").
 		ToSql()
 	if err != nil {
@@ -55,12 +60,24 @@ func findAllItems(ctx context.Context, tx pgx.Tx) (TodoList, error) {
 	defer rows.Close()
 	items := make([]TodoItem, 0, limit)
 	for rows.Next() {
-		var item TodoItem
-		if err := rows.Scan(&item.Id, &item.Title, &item.CreatedAt, &item.DoneAt); err != nil {
+		var id ulid.ULID
+		var title string
+		var createdAt time.Time
+		var doneAt null.Time
+		if err := rows.Scan(&id, &title, &createdAt, &doneAt); err != nil {
 			log.Error().Err(err).Msg("cannot scan an item")
 			return emptyList, err
 		}
-		items = append(items, item)
+		items = append(items, TodoItem{
+			id:        id,
+			title:     title,
+			createdAt: createdAt,
+			doneAt:    doneAt,
+		})
+	}
+	if err = rows.Err(); err != nil {
+		log.Error().Err(err).Msg("Error occurred while iterating rows")
+		return emptyList, err
 	}
 	return TodoList{
 		Items: items,
