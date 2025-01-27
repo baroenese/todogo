@@ -87,15 +87,16 @@ Fungsi yang diekspor di setiap area modul adalah sebagai berikut:
 - `Router()` untuk mengekspor objek `chi.Mux` untuk dipasang.
 - Objek domain, ini opsional. Jika Anda ingin menyembunyikan dan mengisolasi objek domain Anda, maka Anda dapat membuatnya privat.
 
-## Pengujian dan Pemalsuan
+## Pengujian/testing dan *Fake*
 
-Saya jarang menggunakan mock. Baca alasannya [di sini](https://joeblu.com/blog/2023_06_mocks/). Saya menggunakan fake. Hal baik tentang Go adalah memungkinkan tag build yang akan memungkinkan kompilasi bersyarat file. Karena saya menggunakan file untuk menandai batas dan tanggung jawab, ini bekerja dengan baik.
+Saya jarang menggunakan mock. Baca alasannya [di sini](https://joeblu.com/blog/2023_06_mocks/). Saya menggunakan *fake*. Hal baik tentang Go adalah memungkinkan tag build yang akan memungkinkan kompilasi bersyarat file. Karena saya menggunakan file untuk menandai batas dan tanggung jawab, ini bekerja dengan baik.
 
 Lihatlah `repo.go` dan `repo_fake.go` untuk perbandingan.
 
 Untuk membangun atau menjalankan program dengan implementasi palsu, Anda dapat menggunakan parameter `-tags`, dan versi palsu akan dikompilasi sebagai gantinya.
 
 ```sh
+# Build or run
 go build -tags=fake 
 ```
 
