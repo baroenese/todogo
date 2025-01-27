@@ -3,39 +3,43 @@ package todo
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/oklog/ulid/v2"
 )
 
-func listItems(ctx context.Context) (TodoList, error) {
+func withTransaction(ctx context.Context, fn func(ctx context.Context, tx pgx.Tx) error) error {
 	tx, err := pool.Begin(ctx)
 	if err != nil {
-		return TodoList{}, err
+		return err
 	}
-	list, err := findAllItems(ctx, tx)
-	if err != nil {
-		return TodoList{}, err
+	defer tx.Rollback(ctx)
+	if err := fn(ctx, tx); err != nil {
+		return err
 	}
-	tx.Commit(ctx)
-	return list, nil
+	return tx.Commit(ctx)
 }
 
-func createItem(ctx context.Context, title string) (id ulid.ULID, err error) {
+func listItems(ctx context.Context) (TodoList, error) {
+	var list TodoList
+	err := withTransaction(ctx, func(ctx context.Context, tx pgx.Tx) error {
+		var err error
+		list, err = findAllItems(ctx, tx)
+		return err
+	})
+	return list, err
+}
+
+func createItem(ctx context.Context, title string) (ulid.ULID, error) {
+	var id ulid.ULID
 	todoItem, err := NewTodoItem(title)
 	if err != nil {
-		return
+		return id, err
 	}
-	tx, err := pool.Begin(ctx)
+	err = withTransaction(ctx, func(ctx context.Context, tx pgx.Tx) error {
+		return saveItem(ctx, tx, todoItem)
+	})
 	if err != nil {
-		return
-	}
-	err = saveItem(ctx, tx, todoItem)
-	if err != nil {
-		tx.Rollback(ctx)
-		return
-	}
-	err = tx.Commit(ctx)
-	if err != nil {
-		return
+		return id, err
 	}
 	return todoItem.Id, nil
 }
@@ -54,22 +58,15 @@ func findItem(ctx context.Context, id ulid.ULID) (item TodoItem, err error) {
 }
 
 func makeItemDone(ctx context.Context, id ulid.ULID) error {
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	item, err := findItemById(ctx, tx, id)
-	if err != nil {
-		tx.Rollback(ctx)
-		return err
-	}
-	if err = item.MakeDone(); err != nil {
-		tx.Rollback(ctx)
-		return err
-	}
-	if err = saveItem(ctx, tx, item); err != nil {
-		tx.Rollback(ctx)
-		return err
-	}
-	return tx.Commit(ctx)
+	return withTransaction(ctx, func(ctx context.Context, tx pgx.Tx) error {
+		item, err := findItemById(ctx, tx, id)
+		if err != nil {
+			return err
+		}
+		if err = item.MakeDone(); err != nil {
+			tx.Rollback(ctx)
+			return err
+		}
+		return saveItem(ctx, tx, item)
+	})
 }
